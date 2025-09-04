@@ -4,5 +4,29 @@
 
 import { application } from "./application"
 
-import HelloController from "./hello_controller"
-application.register("hello", HelloController)
+import ArchitectureChallengeController from "./architecture_challenge_controller"
+application.register("architecture-challenge", ArchitectureChallengeController)
+
+import CostCalculatorController from "./cost_calculator_controller"
+application.register("cost-calculator", CostCalculatorController)
+
+import FlashcardsController from "./flashcards_controller"
+application.register("flashcards", FlashcardsController)
+
+import QuestionNavigatorController from "./question_navigator_controller"
+application.register("question-navigator", QuestionNavigatorController)
+
+import QuickQuizController from "./quick_quiz_controller"
+application.register("quick-quiz", QuickQuizController)
+
+import ScenarioTreeController from "./scenario_tree_controller"
+application.register("scenario-tree", ScenarioTreeController)
+
+import ServiceMatchController from "./service_match_controller"
+application.register("service-match", ServiceMatchController)
+
+import TestModeController from "./test_mode_controller"
+application.register("test-mode", TestModeController)
+
+import XpCelebrationController from "./xp_celebration_controller"
+application.register("xp-celebration", XpCelebrationController)
