@@ -1,0 +1,57 @@
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-controller="flashcards">
+  <div class="bg-white/10 backdrop-blur rounded-3xl p-8 mb-8 text-center">
+    <h1 class="text-3xl font-black text-white mb-2"><%= @lesson.title %> Flashcards</h1>
+    <p class="text-white/80 text-lg font-semibold">Reviewing <%= @domain.name %></p>
+  </div>
+
+  <% if @questions.any? %>
+    <div class="relative h-96 mb-8">
+      <% @questions.each_with_index do |question, index| %>
+        <div class="absolute inset-0 bg-white rounded-3xl shadow-2xl flex flex-col justify-center items-center p-8 transition-all duration-500 ease-in-out transform backface-hidden"
+             data-flashcards-target="card"
+             data-index="<%= index %>"
+             style="<%= 'z-index: 10; opacity: 1;' if index == 0 %> <%= 'z-index: 0; opacity: 0; transform: translateX(100%);' unless index == 0 %>">
+          <!-- Front of the card (Question) -->
+          <div class="text-center" data-flashcards-target="front">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 leading-relaxed">
+              <%= question.content %>
+            </h2>
+            <p class="text-gray-600 text-sm font-semibold">Click to reveal answer</p>
+          </div>
+
+          <!-- Back of the card (Answer/Explanation) -->
+          <div class="text-center hidden" data-flashcards-target="back">
+            <h2 class="text-2xl font-bold text-green-600 mb-4 leading-relaxed">
+              <%= question.correct_answer %>
+            </h2>
+            <% if question.explanation.present? %>
+              <p class="text-gray-700 text-base leading-relaxed mt-4">
+                <%= question.explanation %>
+              </p>
+            <% end %>
+            <p class="text-gray-600 text-sm font-semibold mt-4">Click to flip back</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="flex justify-between items-center mt-4">
+      <button data-action="flashcards#prevCard" class="bg-white/20 backdrop-blur text-white px-6 py-3 rounded-full font-bold hover:bg-white/30 transition-all duration-200">
+        ← Previous
+      </button>
+      <button data-action="flashcards#flipCard" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+        Flip Card
+      </button>
+      <button data-action="flashcards#nextCard" class="bg-white/20 backdrop-blur text-white px-6 py-3 rounded-full font-bold hover:bg-white/30 transition-all duration-200">
+        Next →
+      </button>
+    </div>
+  <% else %>
+    <div class="bg-white/10 backdrop-blur rounded-3xl p-8 text-center text-white">
+      <p class="text-xl font-semibold">No flashcards available for this lesson.</p>
+      <%= link_to domain_lesson_path(@domain, @lesson), class: "mt-4 inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
+        ← Back to Lesson
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -8,6 +8,8 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
@@ -22,7 +24,7 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
-  <body>
+  <body class="font-nunito bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 min-h-screen">
     <!-- Flash Messages -->
     <% if flash.any? %>
       <div id="flash-messages" class="fixed top-4 right-4 z-50 space-y-2">

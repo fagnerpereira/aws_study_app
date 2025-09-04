@@ -1,2 +1,69 @@
-<h1>Users#show</h1>
-<p>Find me in app/views/users/show.html.erb</p>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="bg-white/10 backdrop-blur rounded-3xl p-8 mb-8 text-center">
+    <h1 class="text-4xl font-black text-white mb-2">Welcome, <%= @user.name %>!</h1>
+    <p class="text-white/80 text-lg font-semibold">Your AWS Study Journey Dashboard</p>
+  </div>
+
+  <!-- User Stats Overview -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center shadow-lg">
+      <div class="text-5xl mb-2">⚡</div>
+      <div class="text-white text-xl font-black"><%= @total_xp %> XP</div>
+      <div class="text-white/80 text-sm font-semibold">Total Experience Points</div>
+    </div>
+    <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center shadow-lg">
+      <div class="text-5xl mb-2">🏆</div>
+      <div class="text-white text-xl font-black">Level <%= @current_level %></div>
+      <div class="text-white/80 text-sm font-semibold">Current Mastery Level</div>
+    </div>
+    <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center shadow-lg">
+      <div class="text-5xl mb-2">🔥</div>
+      <div class="text-white text-xl font-black"><%= @current_streak %> Days</div>
+      <div class="text-white/80 text-sm font-semibold">Current Study Streak</div>
+    </div>
+  </div>
+
+  <!-- Overall Progress -->
+  <div class="bg-white/10 backdrop-blur rounded-3xl p-8 mb-8">
+    <h2 class="text-3xl font-black text-white mb-6 text-center">Your Overall Progress</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <% @domain_progress.each do |dp| %>
+        <div class="bg-white/20 rounded-2xl p-6 shadow-md">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-black text-white"><%= dp[:domain].name %></h3>
+            <span class="text-white text-lg font-bold"><%= dp[:completion_percentage].round %>%</span>
+          </div>
+          <div class="w-full bg-gray-700 rounded-full h-3">
+            <div class="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full" style="width: <%= dp[:completion_percentage] %>%"></div>
+          </div>
+          <p class="text-white/80 text-sm mt-2"><%= dp[:completed_lessons] %> / <%= dp[:total_lessons] %> Lessons Completed</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Completed Lessons History -->
+  <% if @completed_lessons.any? %>
+    <div class="bg-white/10 backdrop-blur rounded-3xl p-8">
+      <h2 class="text-3xl font-black text-white mb-6 text-center">Completed Lessons</h2>
+      <div class="space-y-4">
+        <% @completed_lessons.each do |lesson| %>
+          <div class="bg-white/20 rounded-2xl p-4 flex items-center justify-between shadow-md">
+            <div>
+              <h3 class="text-lg font-bold text-white"><%= lesson.title %></h3>
+              <p class="text-white/80 text-sm"><%= lesson.domain.name %></p>
+            </div>
+            <span class="text-white font-bold">Score: <%= lesson.user_progresses.find_by(user: @user)&.score %>%</span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="bg-white/10 backdrop-blur rounded-3xl p-8 text-center text-white">
+      <p class="text-xl font-semibold">No lessons completed yet. Start your learning journey!</p>
+      <%= link_to root_path, class: "mt-4 inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
+        Explore Domains
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,88 @@
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-controller="test-mode">
+  <div class="bg-white/10 backdrop-blur rounded-3xl p-8 mb-8 text-center">
+    <h1 class="text-3xl font-black text-white mb-2"><%= @lesson.title %> Test Mode</h1>
+    <p class="text-white/80 text-lg font-semibold">Challenge yourself on <%= @domain.name %></p>
+  </div>
+
+  <% if @questions.any? %>
+    <div data-test-mode-target="quizContainer">
+      <% @questions.each_with_index do |question, index| %>
+        <div class="question-card bg-white rounded-3xl shadow-2xl overflow-hidden mb-8"
+             data-test-mode-target="questionCard"
+             data-index="<%= index %>"
+             data-correct-answer="<%= question.correct_answer %>"
+             style="<%= 'display: block;' if index == 0 %> <%= 'display: none;' unless index == 0 %>">
+
+          <!-- Question Header -->
+          <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center font-black text-lg">
+                  <%= index + 1 %>
+                </div>
+                <div>
+                  <div class="text-sm font-bold opacity-80"><%= question.question_type.humanize %> Question</div>
+                  <div class="text-lg font-black"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Question Content -->
+          <div class="p-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-8 leading-relaxed">
+              <%= question.content %>
+            </h3>
+
+            <!-- Answer Options -->
+            <div class="space-y-4">
+              <% if question.question_type == 'true_false' %>
+                <% options = ['True', 'False'] %>
+              <% else %>
+                <% options = question.formatted_options %>
+              <% end %>
+
+              <% options.each do |option| %>
+                <label class="option-button block p-6 rounded-2xl bg-gray-50 border font-bold text-lg cursor-pointer hover:shadow-lg transition-all duration-200">
+                  <%= radio_button_tag "question_#{question.id}", option, false,
+                      class: "hidden",
+                      data: { action: "change->test-mode#selectAnswer" } %>
+                  <div class="flex items-center justify-between">
+                    <span><%= option %></span>
+                    <div class="w-6 h-6 border-2 border-gray-300 rounded-full flex items-center justify-center">
+                      <div class="w-3 h-3 bg-blue-500 rounded-full hidden"></div>
+                    </div>
+                  </div>
+                </label>
+              <% end %>
+            </div>
+
+            <div class="mt-8 text-center">
+              <button data-action="test-mode#submitAnswer" class="inline-block bg-gradient-to-r from-green-400 to-blue-500 text-white px-8 py-4 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105" data-test-mode-target="submitButton">
+                Submit Answer
+              </button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Score Display -->
+    <div data-test-mode-target="scoreDisplay" class="hidden bg-white/10 backdrop-blur rounded-3xl p-8 text-center text-white">
+      <h2 class="text-3xl font-black mb-4">Test Complete!</h2>
+      <p class="text-xl font-semibold mb-6">You scored: <span data-test-mode-target="score"></span>%</p>
+      <p class="text-lg mb-8">Correct: <span data-test-mode-target="correctCount"></span> / Total: <span data-test-mode-target="totalCount"></span></p>
+      <%= link_to domain_lesson_path(@domain, @lesson), class: "inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
+        ← Back to Lesson
+      <% end %>
+    </div>
+
+  <% else %>
+    <div class="bg-white/10 backdrop-blur rounded-3xl p-8 text-center text-white">
+      <p class="text-xl font-semibold">No questions available for this test.</p>
+      <%= link_to domain_lesson_path(@domain, @lesson), class: "mt-4 inline-block bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
+        ← Back to Lesson
+      <% end %>
+    </div>
+  <% end %>
+</div>

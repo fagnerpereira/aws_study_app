@@ -1,9 +1,9 @@
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-  
+
   # Root route
   root "domains#index"
-  
+
   # Games routes
   get "games", to: "games#index"
   get "games/service-match", to: "games#service_match"
@@ -16,23 +16,25 @@ Rails.application.routes.draw do
   post "games/quick-quiz/check", to: "games#check_quiz"
   get "games/scenario-tree", to: "games#scenario_tree"
   post "games/scenario-tree/check", to: "games#check_scenario"
-  
+
   # Authentication routes
   get "login", to: "sessions#new"
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
-  
+
   # User registration
   get "signup", to: "users#new"
   post "signup", to: "users#create"
   get "profile", to: "users#show"
-  
+
   # Study content routes
-  resources :domains, only: [:index, :show] do
-    resources :lessons, only: [:show] do
+  resources :domains, only: [ :index, :show ] do
+    resources :lessons, only: [ :show ] do
       member do
         post :complete
         post :answer_question
+        get :flashcards
+        get :test_mode # New route for test mode
       end
     end
   end

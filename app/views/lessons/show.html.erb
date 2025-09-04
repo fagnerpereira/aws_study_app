@@ -1,126 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= @lesson.title %> - AWS Study Quest</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800;900&display=swap');
-    
-    body {
-      font-family: 'Nunito', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-    }
-
-    .question-card {
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      transform: scale(0.95);
-      opacity: 0;
-    }
-
-    .question-card.active {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    .option-button {
-      transition: all 0.3s ease;
-      border: 3px solid #e5e7eb;
-      cursor: pointer;
-    }
-
-    .option-button:hover {
-      border-color: #667eea;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-    }
-
-    .option-button.selected {
-      border-color: #667eea;
-      background: linear-gradient(45deg, #667eea, #764ba2);
-      color: white;
-      transform: scale(1.02);
-    }
-
-    .option-button.correct {
-      border-color: #10b981;
-      background: linear-gradient(45deg, #10b981, #059669);
-      color: white;
-      animation: correctPulse 0.6s ease-out;
-    }
-
-    .option-button.incorrect {
-      border-color: #ef4444;
-      background: linear-gradient(45deg, #ef4444, #dc2626);
-      color: white;
-      animation: shake 0.5s ease-in-out;
-    }
-
-    @keyframes correctPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1.02); }
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
-    }
-
-    .progress-bar {
-      transition: width 0.6s ease-out;
-    }
-
-    .floating {
-      animation: floating 3s ease-in-out infinite;
-    }
-
-    @keyframes floating {
-      0% { transform: translate(0, 0px); }
-      50% { transform: translate(0, -10px); }
-      100% { transform: translate(0, -0px); }
-    }
-
-    .xp-celebration {
-      animation: xpPop 0.8s ease-out forwards;
-      pointer-events: none;
-    }
-
-    @keyframes xpPop {
-      0% { 
-        opacity: 0;
-        transform: scale(0.5) translateY(0);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.2) translateY(-20px);
-      }
-      100% {
-        opacity: 0;
-        transform: scale(1) translateY(-60px);
-      }
-    }
-
-    .slide-up {
-      animation: slideUp 0.5s ease-out;
-    }
-
-    @keyframes slideUp {
-      0% {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  </style>
-</head>
-
-<body class="min-h-screen">
   <!-- Top Navigation -->
   <nav class="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -138,31 +15,9 @@
           </div>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="flex-1 max-w-md mx-8">
-          <div class="bg-gray-200 rounded-full h-3 relative overflow-hidden">
-            <div class="progress-bar bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full" 
-                 style="width: <%= @completion_percentage %>%"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <span class="text-xs font-black text-gray-700"><%= @completion_percentage.round %>%</span>
-            </div>
-          </div>
-          <div class="text-xs text-gray-500 text-center mt-1 font-semibold">
-            <%= @correct_answers %>/<%= @total_questions %> completed
-          </div>
-        </div>
+        <%= render "lessons/progress_bar", completion_percentage: @completion_percentage, correct_answers: @correct_answers, total_questions: @total_questions %>
 
-        <!-- User Stats -->
-        <div class="flex items-center space-x-4">
-          <div class="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full shadow-lg">
-            <span class="text-lg mr-1">⚡</span>
-            <span class="text-sm font-black"><%= current_user.experience_points %></span>
-          </div>
-          <div class="flex items-center bg-gradient-to-r from-orange-400 to-red-500 text-white px-3 py-1 rounded-full shadow-lg">
-            <span class="text-lg mr-1">🔥</span>
-            <span class="text-sm font-black"><%= current_user.current_streak %></span>
-          </div>
-        </div>
+        <%= render "layouts/user_stats" %>
       </div>
     </div>
   </nav>
@@ -172,128 +27,26 @@
     <!-- Lesson Intro -->
     <div class="bg-white/10 backdrop-blur rounded-3xl p-8 mb-8 text-center">
       <h2 class="text-3xl font-black text-white mb-4"><%= @lesson.title %></h2>
-      <p class="text-white/90 text-lg font-semibold max-w-2xl mx-auto">
+      <p class="text-white/90 text-lg font-semibold max-w-2xl mx-auto mb-4">
         <%= @lesson.content %>
       </p>
+      <div class="flex justify-center space-x-4">
+        <%= link_to flashcards_domain_lesson_path(@domain, @lesson), class: "inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-3 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
+          ⚡ Study with Flashcards
+        <% end %>
+        <%= link_to test_mode_domain_lesson_path(@domain, @lesson), class: "inline-block bg-gradient-to-r from-purple-400 to-pink-500 text-white px-6 py-3 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
+          📝 Take a Test
+        <% end %>
+      </div>
     </div>
 
     <!-- Questions Container -->
-    <div class="space-y-8">
+    <div class="space-y-8" data-controller="question-navigator" data-question-navigator-current-question-index-value="0">
       <% @questions.each_with_index do |question, index| %>
         <% user_answer = @user_answers[question.id] %>
         <% is_answered = user_answer.present? %>
         <% is_correct = user_answer&.correct? %>
-        
-        <div class="question-card active bg-white rounded-3xl shadow-2xl overflow-hidden" 
-             data-question-id="<%= question.id %>">
-          
-          <!-- Question Header -->
-          <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center font-black text-lg">
-                  <%= index + 1 %>
-                </div>
-                <div>
-                  <div class="text-sm font-bold opacity-80"><%= question.question_type.humanize %> Question</div>
-                  <div class="text-lg font-black">+<%= question.experience_points %> XP</div>
-                </div>
-              </div>
-              
-              <% if is_answered %>
-                <div class="flex items-center <%= is_correct ? 'text-green-200' : 'text-red-200' %>">
-                  <% if is_correct %>
-                    <svg class="w-8 h-8 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="font-black text-lg">CORRECT!</span>
-                  <% else %>
-                    <svg class="w-8 h-8 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="font-black text-lg">TRY AGAIN</span>
-                  <% end %>
-                </div>
-              <% end %>
-            </div>
-          </div>
-
-          <!-- Question Content -->
-          <div class="p-8">
-            <h3 class="text-2xl font-bold text-gray-900 mb-8 leading-relaxed">
-              <%= question.content %>
-            </h3>
-
-            <!-- Answer Options -->
-            <div class="space-y-4">
-              <% if question.question_type == 'true_false' %>
-                <% options = ['True', 'False'] %>
-              <% else %>
-                <% options = question.formatted_options %>
-              <% end %>
-
-              <% if is_answered %>
-                <!-- Show results for answered question -->
-                <% options.each do |option| %>
-                  <% is_selected = user_answer.selected_answer == option %>
-                  <% is_correct_answer = question.correct_answer == option %>
-                  <% button_class = if is_correct_answer
-                                     'correct'
-                                   elsif is_selected && !is_correct_answer
-                                     'incorrect'
-                                   else
-                                     ''
-                                   end %>
-                  
-                  <div class="option-button <%= button_class %> p-6 rounded-2xl bg-white border font-bold text-lg">
-                    <div class="flex items-center justify-between">
-                      <span><%= option %></span>
-                      <% if is_correct_answer %>
-                        <span class="text-2xl">✅</span>
-                      <% elsif is_selected && !is_correct_answer %>
-                        <span class="text-2xl">❌</span>
-                      <% end %>
-                    </div>
-                  </div>
-                <% end %>
-
-                <!-- Explanation -->
-                <% if question.explanation.present? %>
-                  <div class="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-r-2xl slide-up">
-                    <div class="flex items-start">
-                      <div class="text-2xl mr-3">💡</div>
-                      <div>
-                        <h4 class="font-black text-blue-900 mb-2">Explanation</h4>
-                        <p class="text-blue-800 font-semibold"><%= question.explanation %></p>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
-
-              <% else %>
-                <!-- Interactive options for unanswered question -->
-                <%= form_with url: answer_question_domain_lesson_path(@domain, @lesson), 
-                    method: :post, local: true, class: "space-y-4" do |form| %>
-                  <%= hidden_field_tag :question_id, question.id %>
-                  
-                  <% options.each do |option| %>
-                    <label class="option-button block p-6 rounded-2xl bg-white border font-bold text-lg cursor-pointer hover:shadow-lg transition-all duration-200">
-                      <%= radio_button_tag :selected_answer, option, false, 
-                          class: "hidden", 
-                          onchange: "this.form.submit();" %>
-                      <div class="flex items-center justify-between">
-                        <span><%= option %></span>
-                        <div class="w-6 h-6 border-2 border-gray-300 rounded-full flex items-center justify-center">
-                          <div class="w-3 h-3 bg-blue-500 rounded-full hidden"></div>
-                        </div>
-                      </div>
-                    </label>
-                  <% end %>
-                <% end %>
-              <% end %>
-            </div>
-          </div>
-        </div>
+        <%= render "lessons/question_card", question: question, index: index, user_answer: user_answer, is_answered: is_answered, is_correct: is_correct, domain: @domain, lesson: @lesson %>
       <% end %>
     </div>
 
@@ -304,8 +57,8 @@
         <h2 class="text-3xl font-black mb-4">Lesson Complete!</h2>
         <p class="text-xl font-semibold mb-6">Amazing work! You've mastered this lesson.</p>
         <p class="text-lg mb-8">Ready to claim your XP and move forward?</p>
-        
-        <%= link_to complete_domain_lesson_path(@domain, @lesson), method: :post, 
+
+        <%= link_to complete_domain_lesson_path(@domain, @lesson), method: :post,
             class: "inline-block bg-white text-blue-600 px-8 py-4 rounded-2xl font-black text-xl hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
           🏆 Complete Lesson & Earn <%= @lesson.total_experience_points %> XP
         <% end %>
@@ -318,12 +71,12 @@
           You completed this lesson with a score of <%= @user_progress.score %>%
         </p>
         <div class="flex justify-center space-x-4 mt-6">
-          <%= link_to domain_path(@domain), 
+          <%= link_to domain_path(@domain),
               class: "bg-white text-green-600 px-6 py-3 rounded-full font-black hover:shadow-lg transition-all" do %>
             ← Back to <%= @domain.name %>
           <% end %>
           <% if next_lesson = @domain.lessons.where('position > ?', @lesson.position).first %>
-            <%= link_to domain_lesson_path(@domain, next_lesson), 
+            <%= link_to domain_lesson_path(@domain, next_lesson),
                 class: "bg-green-600 text-white px-6 py-3 rounded-full font-black hover:shadow-lg transition-all" do %>
               Next Lesson →
             <% end %>
@@ -334,47 +87,12 @@
   </div>
 
   <!-- XP Celebration Effect -->
+  <div id="xp-celebration-container"></div>
   <div id="xp-celebration" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 hidden">
     <div class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-2xl shadow-2xl">
       <div class="text-center">
         <div class="text-3xl mb-2">⚡</div>
-        <div class="font-black text-lg">+15 XP</div>
+        <div class="font-black text-lg">+=15 XP</div>
       </div>
     </div>
   </div>
-
-  <script>
-    // Add interactive effects
-    document.querySelectorAll('.option-button label').forEach(button => {
-      button.addEventListener('click', function(e) {
-        // Visual feedback
-        this.classList.add('selected');
-        
-        // Show XP celebration for correct answers (you'd implement this based on server response)
-        setTimeout(() => {
-          const xpCelebration = document.getElementById('xp-celebration');
-          xpCelebration.classList.remove('hidden');
-          xpCelebration.classList.add('xp-celebration');
-          
-          setTimeout(() => {
-            xpCelebration.classList.add('hidden');
-            xpCelebration.classList.remove('xp-celebration');
-          }, 800);
-        }, 500);
-      });
-    });
-
-    // Smooth progress bar updates
-    document.addEventListener('DOMContentLoaded', function() {
-      const progressBar = document.querySelector('.progress-bar');
-      if (progressBar) {
-        const targetWidth = progressBar.style.width;
-        progressBar.style.width = '0%';
-        setTimeout(() => {
-          progressBar.style.width = targetWidth;
-        }, 500);
-      }
-    });
-  </script>
-</body>
-</html>
