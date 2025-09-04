@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Lessons", type: :request do
   let(:user) { create(:user) }
-  
+
   describe "GET /show" do
     it "returns http success" do
       login_as(user)
