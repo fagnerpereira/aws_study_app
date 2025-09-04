@@ -1,98 +1,77 @@
-  <!-- Top Navigation -->
-  <nav class="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <!-- Back Button & Title -->
-        <div class="flex items-center space-x-4">
-          <%= link_to domain_path(@domain), class: "text-gray-600 hover:text-gray-800 transition-colors" do %>
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-          <% end %>
-          <div>
-            <h1 class="text-lg font-black text-gray-900"><%= @lesson.title %></h1>
-            <p class="text-xs text-gray-600 font-semibold"><%= @domain.name %></p>
-          </div>
-        </div>
+<!-- app/views/lessons/show.html.erb -->
 
-        <%= render "lessons/progress_bar", completion_percentage: @completion_percentage, correct_answers: @correct_answers, total_questions: @total_questions %>
+<%
+  domain_colors = {
+    'Design Resilient Architectures' => { bg: 'from-blue-500 to-cyan-400', icon: '🏗️', accent: 'bg-blue-500', text: 'text-blue-500' },
+    'Design High-Performing Architectures' => { bg: 'from-green-500 to-emerald-400', icon: '⚡', accent: 'bg-green-500', text: 'text-green-500' },
+    'Design Secure Applications and Architectures' => { bg: 'from-purple-500 to-pink-400', icon: '🔒', accent: 'bg-purple-500', text: 'text-purple-500' },
+    'Design Cost-Optimized Architectures' => { bg: 'from-orange-500 to-red-400', icon: '💰', accent: 'bg-orange-500', text: 'text-orange-500' }
+  }
+  color = domain_colors[@domain.name] || { bg: 'from-gray-500 to-gray-400', icon: '📚', accent: 'bg-gray-500', text: 'text-gray-500' }
+%>
 
-        <%= render "layouts/user_stats" %>
-      </div>
-    </div>
-  </nav>
+<!-- XP Celebration Container -->
+<div id="xp-celebration-container" class="fixed inset-0 pointer-events-none z-50"></div>
 
-  <!-- Main Content -->
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Lesson Intro -->
-    <div class="bg-white/10 backdrop-blur rounded-3xl p-8 mb-8 text-center">
-      <h2 class="text-3xl font-black text-white mb-4"><%= @lesson.title %></h2>
-      <p class="text-white/90 text-lg font-semibold max-w-2xl mx-auto mb-4">
-        <%= @lesson.content %>
-      </p>
-      <div class="flex justify-center space-x-4">
-        <%= link_to flashcards_domain_lesson_path(@domain, @lesson), class: "inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-3 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
-          ⚡ Study with Flashcards
-        <% end %>
-        <%= link_to test_mode_domain_lesson_path(@domain, @lesson), class: "inline-block bg-gradient-to-r from-purple-400 to-pink-500 text-white px-6 py-3 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
-          📝 Take a Test
+<!-- Top Navigation Bar -->
+<nav class="bg-white/95 backdrop-blur-sm border-b border-white/20 sticky top-0 z-40 shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-20">
+      <!-- Back to Domain & Lesson Title -->
+      <div class="flex items-center space-x-4">
+        <%= link_to domain_path(@domain), class: "flex items-center text-gray-600 hover:text-gray-900 transition" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          <span class="font-bold ml-2"><%= @domain.name %></span>
         <% end %>
       </div>
-    </div>
 
-    <!-- Questions Container -->
-    <div class="space-y-8" data-controller="question-navigator" data-question-navigator-current-question-index-value="0">
+      <!-- Lesson Progress Bar -->
+      <%= render "lessons/progress_bar", completion_percentage: @completion_percentage, correct_answers: @correct_answers, total_questions: @total_questions %>
+
+      <!-- User Stats -->
+      <%= render "layouts/user_stats" %>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Lesson Header -->
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-black text-gray-800 mb-2"><%= @lesson.title %></h1>
+    <p class="text-lg text-gray-600"><%= @lesson.summary %></p>
+  </div>
+
+  <!-- Lesson Content -->
+  <div class="prose lg:prose-xl max-w-none bg-white rounded-2xl shadow-lg p-8 mb-12">
+    <%= @lesson.content.html_safe %>
+  </div>
+
+  <!-- Interactive Questions -->
+  <div>
+    <h2 class="text-3xl font-black text-gray-800 mb-8 text-center">Check Your Knowledge</h2>
+    <div class="space-y-8">
       <% @questions.each_with_index do |question, index| %>
-        <% user_answer = @user_answers[question.id] %>
-        <% is_answered = user_answer.present? %>
-        <% is_correct = user_answer&.correct? %>
-        <%= render "lessons/question_card", question: question, index: index, user_answer: user_answer, is_answered: is_answered, is_correct: is_correct, domain: @domain, lesson: @lesson %>
+        <%= render "lessons/question_card",
+              question: question,
+              index: index,
+              user_answer: @user_answers[question.id],
+              is_answered: @user_answers[question.id].present?,
+              is_correct: @user_answers[question.id]&.correct?,
+              domain: @domain,
+              lesson: @lesson %>
       <% end %>
     </div>
+  </div>
 
-    <!-- Lesson Complete Section -->
-    <% if @completion_percentage == 100 && !@user_progress&.completed? %>
-      <div class="bg-gradient-to-r from-green-400 to-blue-500 rounded-3xl p-8 mt-12 text-center text-white shadow-2xl">
-        <div class="text-6xl mb-4">🎉</div>
-        <h2 class="text-3xl font-black mb-4">Lesson Complete!</h2>
-        <p class="text-xl font-semibold mb-6">Amazing work! You've mastered this lesson.</p>
-        <p class="text-lg mb-8">Ready to claim your XP and move forward?</p>
-
-        <%= link_to complete_domain_lesson_path(@domain, @lesson), method: :post,
-            class: "inline-block bg-white text-blue-600 px-8 py-4 rounded-2xl font-black text-xl hover:shadow-xl transition-all duration-200 transform hover:scale-105" do %>
-          🏆 Complete Lesson & Earn <%= @lesson.total_experience_points %> XP
-        <% end %>
-      </div>
-    <% elsif @user_progress&.completed? %>
-      <div class="bg-gradient-to-r from-green-500 to-emerald-400 rounded-3xl p-8 mt-12 text-center text-white shadow-2xl">
-        <div class="text-6xl mb-4">🏆</div>
-        <h2 class="text-3xl font-black mb-4">Lesson Mastered!</h2>
-        <p class="text-xl font-semibold mb-4">
-          You completed this lesson with a score of <%= @user_progress.score %>%
-        </p>
-        <div class="flex justify-center space-x-4 mt-6">
-          <%= link_to domain_path(@domain),
-              class: "bg-white text-green-600 px-6 py-3 rounded-full font-black hover:shadow-lg transition-all" do %>
-            ← Back to <%= @domain.name %>
-          <% end %>
-          <% if next_lesson = @domain.lessons.where('position > ?', @lesson.position).first %>
-            <%= link_to domain_lesson_path(@domain, next_lesson),
-                class: "bg-green-600 text-white px-6 py-3 rounded-full font-black hover:shadow-lg transition-all" do %>
-              Next Lesson →
-            <% end %>
-          <% end %>
-        </div>
-      </div>
+  <!-- Lesson Completion -->
+  <div class="mt-16 text-center">
+    <% if @completion_percentage == 100 %>
+      <%= form_with url: complete_domain_lesson_path(@domain, @lesson), method: :post do |f| %>
+        <%= f.submit "Complete Lesson & Claim XP", class: "bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold py-4 px-8 rounded-full text-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105" %>
+      <% end %>
+    <% else %>
+      <p class="text-gray-600">Answer all questions correctly to complete the lesson.</p>
     <% end %>
   </div>
-
-  <!-- XP Celebration Effect -->
-  <div id="xp-celebration-container"></div>
-  <div id="xp-celebration" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 hidden">
-    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-2xl shadow-2xl">
-      <div class="text-center">
-        <div class="text-3xl mb-2">⚡</div>
-        <div class="font-black text-lg">+=15 XP</div>
-      </div>
-    </div>
-  </div>
+</div>

@@ -1,0 +1,9 @@
+<!-- app/views/games/_quiz_question.html.erb -->
+<h2 class="text-2xl font-bold text-white mb-4"><%= question[:question] %></h2>
+<div class="space-y-3">
+  <% question[:options].each do |option| %>
+    <button class="w-full bg-white/20 text-white p-4 rounded-lg text-left hover:bg-white/30 transition-all duration-200" data-action="click->quick-quiz#selectAnswer" data-option="<%= option %>">
+      <%= option %>
+    </button>
+  <% end %>
+</div>

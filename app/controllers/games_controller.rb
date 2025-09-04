@@ -68,8 +68,37 @@ class GamesController < ApplicationController
     @current_scenario = @architecture_scenarios.sample
   end
 
+  def check_architecture
+    scenario = find_architecture_scenario_by_title(params[:scenario_title])
+    selected_components = params[:selected_components] || []
+    
+    required_components = scenario[:components].select { |c| c[:required] }.map { |c| c[:name] }
+    
+    correct_selections = selected_components.select { |c| required_components.include?(c) }
+    incorrect_selections = selected_components.reject { |c| required_components.include?(c) }
+    
+    score_percentage = if required_components.empty?
+      100
+    else
+      ((correct_selections.length - incorrect_selections.length).to_f / required_components.length * 100).round.clamp(0, 100)
+    end
+
+    xp_earned = calculate_game_xp(score_percentage, :architecture_challenge)
+    
+    current_user.add_experience!(xp_earned)
+    track_game_played(:architecture_challenge, score_percentage)
+    
+    render json: {
+      correct: correct_selections.length,
+      total_required: required_components.length,
+      score: score_percentage,
+      xp_earned: xp_earned,
+      message: get_score_message(score_percentage)
+    }
+  end
+
   def quick_quiz
-    @quiz_questions = [
+    @quiz_questions = session[:quiz_questions] || [
       {
         question: "Which AWS service provides a fully managed NoSQL database?",
         options: ["Amazon RDS", "Amazon DynamoDB", "Amazon Redshift", "Amazon ElastiCache"],
@@ -101,10 +130,48 @@ class GamesController < ApplicationController
         explanation: "S3 Glacier Deep Archive is the lowest-cost storage class for long-term retention of data accessed rarely."
       }
     ]
-    @current_question = @quiz_questions.sample
-    session[:quiz_questions] = @quiz_questions
+    
+    session[:quiz_questions] = @quiz_questions.shuffle
+    session[:current_quiz_question_index] = 0
     session[:current_quiz_score] = 0
-    session[:quiz_question_count] = 0
+    
+    @current_question = session[:quiz_questions][session[:current_quiz_question_index]]
+  end
+
+  def check_quiz
+    questions = session[:quiz_questions]
+    current_index = session[:current_quiz_question_index]
+    
+    selected_answer = params[:selected_answer]
+    correct_answer = questions[current_index][:correct]
+    
+    if selected_answer == correct_answer
+      session[:current_quiz_score] += 1
+    end
+    
+    session[:current_quiz_question_index] += 1
+    
+    if session[:current_quiz_question_index] >= questions.length
+      score_percentage = (session[:current_quiz_score].to_f / questions.length * 100).round
+      xp_earned = calculate_game_xp(score_percentage, :quick_quiz)
+      
+      current_user.add_experience!(xp_earned)
+      track_game_played(:quick_quiz, score_percentage)
+      
+      render json: {
+        game_over: true,
+        correct_answers: session[:current_quiz_score],
+        total_questions: questions.length,
+        score: score_percentage,
+        xp_earned: xp_earned
+      }
+    else
+      next_question = questions[session[:current_quiz_question_index]]
+      render json: {
+        game_over: false,
+        next_question_html: render_to_string(partial: 'games/quiz_question', locals: { question: next_question })
+      }
+    end
   end
 
   def cost_calculator
@@ -132,55 +199,69 @@ class GamesController < ApplicationController
     ]
   end
 
+  def check_cost
+    scenario = find_cost_scenario_by_title(params[:scenario_title])
+    user_total = params[:user_total].to_f
+    correct_total = scenario[:correct_total]
+    
+    difference = (user_total - correct_total).abs
+    
+    # Score is based on how close the user is to the correct answer
+    score_percentage = [100 - (difference / correct_total * 100), 0].max.round
+    
+    xp_earned = calculate_game_xp(score_percentage, :cost_calculator)
+    
+    current_user.add_experience!(xp_earned)
+    track_game_played(:cost_calculator, score_percentage)
+    
+    render json: {
+      difference: difference,
+      score: score_percentage,
+      xp_earned: xp_earned,
+      message: get_score_message(score_percentage)
+    }
+  end
+
   def scenario_tree
-    @scenarios = [
-      {
-        id: 1,
-        title: "Database Performance Issue",
-        description: "Your RDS MySQL database is experiencing high CPU utilization and slow query response times.",
-        options: [
-          {
-            text: "Scale up to a larger instance type",
-            next_scenario: 2,
-            explanation: "Vertical scaling can help with CPU-bound workloads but may not address root cause.",
-            points: 5
-          },
-          {
-            text: "Add read replicas",
-            next_scenario: 3,
-            explanation: "Read replicas can offload read traffic and improve performance.",
-            points: 10
-          },
-          {
-            text: "Implement ElastiCache",
-            next_scenario: 4,
-            explanation: "Caching frequently accessed data can significantly reduce database load.",
-            points: 15
-          }
-        ]
-      },
-      {
-        id: 2,
-        title: "After Scaling Up",
-        description: "The larger instance helped temporarily, but costs have increased significantly. What's your next step?",
-        options: [
-          {
-            text: "Analyze slow query logs",
-            next_scenario: :end,
-            explanation: "Great choice! Query optimization is often the most cost-effective solution.",
-            points: 20
-          },
-          {
-            text: "Keep the larger instance",
-            next_scenario: :end,
-            explanation: "This addresses the symptom but not the root cause. Consider query optimization.",
-            points: 5
-          }
-        ]
-      }
-    ]
+    @scenarios = get_all_scenarios
     @current_scenario = @scenarios.first
     session[:scenario_score] = 0
+  end
+
+  def check_scenario
+    next_scenario_id_str = params[:next_scenario_id]
+    
+    if next_scenario_id_str == 'end'
+      # End of scenario
+      score_percentage = (session[:scenario_score].to_f / 35 * 100).round.clamp(0, 100) # Max score is 35
+      xp_earned = calculate_game_xp(score_percentage, :scenario_tree)
+      
+      current_user.add_experience!(xp_earned)
+      track_game_played(:scenario_tree, score_percentage)
+      
+      render json: {
+        game_over: true,
+        total_score: session[:scenario_score],
+        score: score_percentage,
+        xp_earned: xp_earned
+      }
+    else
+      next_scenario_id = next_scenario_id_str.to_i
+      next_scenario = get_all_scenarios.find { |s| s[:id] == next_scenario_id }
+      
+      # In a real app, you'd fetch the option chosen and add points.
+      # For this simplified version, we'll just move to the next step.
+      
+      if next_scenario
+        render json: {
+          game_over: false,
+          next_scenario_html: render_to_string(partial: 'games/scenario_step', locals: { scenario: next_scenario })
+        }
+      else
+        # Handle case where scenario is not found, maybe end the game.
+        render json: { game_over: true, error: "Scenario not found" }, status: :not_found
+      end
+    end
   end
 
   private
@@ -198,6 +279,81 @@ class GamesController < ApplicationController
       { name: 'Amazon EBS', description: 'Block storage for EC2', category: 'Storage' },
       { name: 'AWS CloudWatch', description: 'Monitoring and observability', category: 'Management' }
     ].find { |service| service[:name] == name }
+  end
+
+  def find_architecture_scenario_by_title(title)
+    [
+      {
+        title: "High Availability Web Application",
+        description: "Design a 3-tier web application with high availability across multiple AZs",
+        components: [
+          { name: "Application Load Balancer", type: "Load Balancer", required: true },
+          { name: "Auto Scaling Group", type: "Compute", required: true },
+          { name: "Amazon RDS Multi-AZ", type: "Database", required: true },
+          { name: "Amazon S3", type: "Storage", required: false },
+          { name: "Amazon CloudFront", type: "CDN", required: false },
+          { name: "Amazon ElastiCache", type: "Cache", required: false }
+        ]
+      }
+    ].find { |scenario| scenario[:title] == title }
+  end
+
+  def find_cost_scenario_by_title(title)
+    [
+      {
+        title: "Startup Web Application",
+        description: "Calculate monthly cost for a small web app",
+        requirements: {
+          "EC2 instances": "2 x t3.micro (24/7)",
+          "S3 storage": "100 GB",
+          "RDS database": "1 x t3.micro (24/7)",
+          "Data transfer": "500 GB/month"
+        },
+        correct_total: 52.35
+      }
+    ].find { |scenario| scenario[:title] == title }
+  end
+
+  def get_all_scenarios
+    [
+      {
+        id: 1,
+        title: "Database Performance Issue",
+        description: "Your RDS MySQL database is experiencing high CPU utilization and slow query response times.",
+        options: [
+          { text: "Scale up to a larger instance type", next_scenario: 2, points: 5 },
+          { text: "Add read replicas", next_scenario: 3, points: 10 },
+          { text: "Implement ElastiCache", next_scenario: 4, points: 15 }
+        ]
+      },
+      {
+        id: 2,
+        title: "After Scaling Up",
+        description: "The larger instance helped temporarily, but costs have increased. What's next?",
+        options: [
+          { text: "Analyze slow query logs", next_scenario: 'end', points: 20 },
+          { text: "Keep the larger instance", next_scenario: 'end', points: 5 }
+        ]
+      },
+      {
+        id: 3,
+        title: "After Adding Read Replicas",
+        description: "Read traffic is now distributed, but write operations are still slow.",
+        options: [
+          { text: "Optimize write queries", next_scenario: 'end', points: 20 },
+          { text: "Increase instance size", next_scenario: 2, points: 5 }
+        ]
+      },
+      {
+        id: 4,
+        title: "After Implementing ElastiCache",
+        description: "Database load is reduced, but there are cache misses for some queries.",
+        options: [
+          { text: "Increase cache size", next_scenario: 'end', points: 10 },
+          { text: "Analyze and optimize cache usage", next_scenario: 'end', points: 20 }
+        ]
+      }
+    ]
   end
 
   def calculate_game_xp(score_percentage, game_type)

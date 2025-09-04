@@ -1,2 +1,56 @@
-<h1>Games#architecture_challenge</h1>
-<p>Find me in app/views/games/architecture_challenge.html.erb</p>
+<!-- app/views/games/architecture_challenge.html.erb -->
+
+<div class="bg-gray-800 min-h-screen flex flex-col items-center justify-center p-4" data-controller="architecture-challenge">
+  <div class="w-full max-w-4xl">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-black text-white">🏗️ Architecture Challenge</h1>
+      <p class="text-white/80 text-lg mt-2">Select the required components for the given scenario.</p>
+    </div>
+
+    <!-- Scenario -->
+    <div class="bg-white/10 backdrop-blur rounded-2xl p-8 mb-8">
+      <h2 class="text-2xl font-bold text-white mb-2"><%= @current_scenario[:title] %></h2>
+      <p class="text-white/90"><%= @current_scenario[:description] %></p>
+    </div>
+
+    <!-- Components -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+      <% @current_scenario[:components].each do |component| %>
+        <div class="component-card bg-white p-6 rounded-lg shadow cursor-pointer" data-action="click->architecture-challenge#toggleComponent" data-component-name="<%= component[:name] %>">
+          <p class="font-bold text-gray-800 text-lg"><%= component[:name] %></p>
+          <p class="text-sm text-gray-600"><%= component[:type] %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center mt-8">
+      <button class="bg-green-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-green-600 transition-all duration-200" data-action="click->architecture-challenge#checkArchitecture">
+        Submit Architecture
+      </button>
+      <%= link_to "Back to Arcade", games_path, class: "text-white/80 ml-4 hover:text-white" %>
+    </div>
+  </div>
+
+  <!-- Result Modal -->
+  <div class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4" data-architecture-challenge-target="modal">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center transform transition-all duration-300 scale-95">
+      <h2 class="text-3xl font-black mb-4" data-architecture-challenge-target="modalTitle"></h2>
+      <p class="text-gray-600 text-lg mb-6" data-architecture-challenge-target="modalMessage"></p>
+      <div class="grid grid-cols-2 gap-4 text-white mb-6">
+        <div class="bg-blue-500 rounded-lg p-4">
+          <div class="text-2xl font-bold" data-architecture-challenge-target="modalScore"></div>
+          <div>Score</div>
+        </div>
+        <div class="bg-purple-500 rounded-lg p-4">
+          <div class="text-2xl font-bold" data-architecture-challenge-target="modalXp"></div>
+          <div>XP Earned</div>
+        </div>
+      </div>
+      <a href="<%= games_architecture_challenge_path %>" class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition-all duration-200">
+        Try Another Scenario
+      </a>
+    </div>
+  </div>
+</div>

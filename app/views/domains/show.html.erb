@@ -1,2 +1,123 @@
-<h1>Domains#show</h1>
-<p>Find me in app/views/domains/show.html.erb</p>
+<!-- app/views/domains/show.html.erb -->
+
+<%
+  domain_colors = {
+    'Design Resilient Architectures' => { bg: 'from-blue-500 to-cyan-400', icon: '🏗️', accent: 'bg-blue-500', text: 'text-blue-500' },
+    'Design High-Performing Architectures' => { bg: 'from-green-500 to-emerald-400', icon: '⚡', accent: 'bg-green-500', text: 'text-green-500' },
+    'Design Secure Applications and Architectures' => { bg: 'from-purple-500 to-pink-400', icon: '🔒', accent: 'bg-purple-500', text: 'text-purple-500' },
+    'Design Cost-Optimized Architectures' => { bg: 'from-orange-500 to-red-400', icon: '💰', accent: 'bg-orange-500', text: 'text-orange-500' }
+  }
+  color = domain_colors[@domain.name] || { bg: 'from-gray-500 to-gray-400', icon: '📚', accent: 'bg-gray-500', text: 'text-gray-500' }
+%>
+
+<!-- Top Navigation Bar -->
+<nav class="bg-white/95 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50 shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-20">
+      <!-- Logo & Back Button -->
+      <div class="flex items-center space-x-4">
+        <%= link_to root_path, class: "flex items-center space-x-3" do %>
+          <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg floating">
+            <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-black gradient-text">AWS Study Quest</h1>
+            <p class="text-xs text-gray-600 font-semibold">Master SAA-C03 Certification</p>
+          </div>
+        <% end %>
+      </div>
+
+      <%= render "layouts/user_stats" %>
+    </div>
+  </div>
+</nav>
+
+<!-- Domain Header -->
+<div class="bg-gradient-to-r <%= color[:bg] %> py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="flex items-center justify-center mb-4">
+      <span class="text-5xl mr-4"><%= color[:icon] %></span>
+      <h1 class="text-4xl font-black text-white"><%= @domain.name %></h1>
+    </div>
+    <p class="text-white/90 text-lg max-w-3xl mx-auto"><%= @domain.description %></p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Column: Lessons List -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-3xl shadow-xl p-8">
+        <h2 class="text-3xl font-black text-gray-800 mb-6">Lessons in this Domain</h2>
+        <ul class="space-y-4">
+          <% @lessons.each do |lesson| %>
+            <% is_completed = logged_in? && @completed_lesson_ids.include?(lesson.id) %>
+            <li>
+              <%= link_to domain_lesson_path(@domain, lesson), class: "lesson-item flex items-center justify-between p-6 rounded-2xl transition-all duration-300 #{is_completed ? 'bg-green-50 border-l-4 border-green-500' : 'bg-gray-50 hover:bg-gray-100'}" do %>
+                <div class="flex items-center">
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4 #{is_completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}">
+                    <% if is_completed %>
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <% else %>
+                      <span class="font-bold text-lg"><%= lesson.position %></span>
+                    <% end %>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-bold text-gray-900"><%= lesson.title %></h3>
+                    <p class="text-sm text-gray-500"><%= lesson.summary %></p>
+                  </div>
+                </div>
+                <div class="text-gray-400">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right Column: Domain Progress -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-3xl shadow-xl p-8 sticky top-32">
+        <h3 class="text-2xl font-black text-gray-800 mb-6">Your Progress</h3>
+        <% if logged_in? %>
+          <div class="text-center mb-6">
+            <div class="relative inline-block">
+              <svg class="progress-ring w-32 h-32" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="8"/>
+                <circle cx="60" cy="60" r="54" fill="none" stroke-width="8" stroke-linecap="round"
+                        class="progress-ring-circle <%= color[:text] %>"
+                        stroke-dasharray="<%= 2 * Math::PI * 54 %>"
+                        stroke-dashoffset="<%= 2 * Math::PI * 54 * (1 - @domain_progress[:completion_percentage]/100) %>"/>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="font-black text-3xl <%= color[:text] %>"><%= @domain_progress[:completion_percentage].round %>%</span>
+              </div>
+            </div>
+            <p class="mt-4 text-lg font-bold text-gray-700">
+              <%= @domain_progress[:completed_lessons] %> of <%= @domain_progress[:total_lessons] %> lessons completed
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <a href="#" class="block w-full text-center bg-gradient-to-r <%= color[:bg] %> text-white font-bold py-4 px-6 rounded-xl hover:shadow-lg transition-all duration-200">
+              🚀 Review Flashcards
+            </a>
+            <a href="#" class="block w-full text-center bg-gray-700 text-white font-bold py-4 px-6 rounded-xl hover:bg-gray-800 transition-all duration-200">
+              🎯 Take a Test
+            </a>
+          </div>
+        <% else %>
+          <div class="text-center text-gray-600 bg-gray-50 p-6 rounded-xl">
+            <p class="mb-4">Sign in to track your progress and start learning!</p>
+            <%= link_to "Sign In", login_path, class: "bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,121 +1,58 @@
+<!-- app/views/lessons/_question_card.html.erb -->
 <%= turbo_frame_tag "question_#{question.id}" do %>
-  <div class="question-card active bg-white rounded-3xl shadow-2xl overflow-hidden"
-       data-question-id="<%= question.id %>"
-       data-controller="question-navigator"
-       data-question-navigator-current-question-index-value="<%= index %>">
-
-    <!-- Question Header -->
-    <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center space-x-3">
-          <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center font-black text-lg">
-            <%= index + 1 %>
-          </div>
-          <div>
-            <div class="text-sm font-bold opacity-80"><%= question.question_type.humanize %> Question</div>
-            <div class="text-lg font-black">+=<%= question.experience_points %> XP</div>
-          </div>
-        </div>
-
-        <% if is_answered %>
-          <div class="flex items-center <%= is_correct ? 'text-green-200' : 'text-red-200' %>">
-            <% if is_correct %>
-              <svg class="w-8 h-8 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-              </svg>
-              <span class="font-black text-lg">CORRECT!</span>
-            <% else %>
-              <svg class="w-8 h-8 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-              </svg>
-              <span class="font-black text-lg">TRY AGAIN</span>
-            <% end %>
-          </div>
-        <% end %>
+  <div class="question-card bg-white rounded-2xl shadow-lg p-8 border-l-4 <%= is_answered ? (is_correct ? 'border-green-500' : 'border-red-500') : 'border-gray-200' %>">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <h3 class="text-xl font-bold text-gray-800">Question <%= index + 1 %></h3>
+        <p class="text-gray-600 mt-2"><%= question.text %></p>
+      </div>
+      <div class="bg-gray-100 text-gray-700 text-sm font-bold px-3 py-1 rounded-full">
+        <%= question.experience_points %> XP
       </div>
     </div>
 
-    <!-- Question Content -->
-    <div class="p-8">
-      <h3 class="text-2xl font-bold text-gray-900 mb-8 leading-relaxed">
-        <%= question.content %>
-      </h3>
-
-      <!-- Answer Options -->
-      <div class="space-y-4">
-        <% if question.question_type == 'true_false' %>
-          <% options = ['True', 'False'] %>
-        <% else %>
-          <% options = question.formatted_options %>
-        <% end %>
-
-        <% if is_answered %>
-          <!-- Show results for answered question -->
-          <% options.each do |option| %>
-            <% is_selected = user_answer.selected_answer == option %>
-            <% is_correct_answer = question.correct_answer == option %>
-            <% button_class = if is_correct_answer
-                               'correct'
-                             elsif is_selected && !is_correct_answer
-                               'incorrect'
-                             else
-                               ''
-                             end %>
-
-            <div class="option-button <%= button_class %> p-6 rounded-2xl bg-white border font-bold text-lg">
-              <div class="flex items-center justify-between">
-                <span><%= option %></span>
-                <% if is_correct_answer %>
-                  <span class="text-2xl">✅</span>
-                <% elsif is_selected && !is_correct_answer %>
-                  <span class="text-2xl">❌</span>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
-
-          <!-- Explanation -->
-          <% if question.explanation.present? %>
-            <div class="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-r-2xl slide-up">
-              <div class="flex items-start">
-                <div class="text-2xl mr-3">💡</div>
-                <div>
-                  <h4 class="font-black text-blue-900 mb-2">Explanation</h4>
-                  <p class="text-blue-800 font-semibold"><%= question.explanation %></p>
-                </div>
-              </div>
-            </div>
-          <% end %>
-
-          <!-- Next Question Button -->
-          <div class="mt-8 text-center">
-            <button data-action="question-navigator#nextQuestion" class="inline-block bg-gradient-to-r from-green-400 to-blue-500 text-white px-8 py-4 rounded-full font-black hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-              Next Question →
-            </button>
-          </div>
-
-        <% else %>
-          <!-- Interactive options for unanswered question -->
-          <%= form_with url: answer_question_domain_lesson_path(@domain, @lesson),
-              method: :post, class: "space-y-4" do |form| %>
-            <%= hidden_field_tag :question_id, question.id %>
-
-            <% options.each do |option| %>
-              <label class="option-button block p-6 rounded-2xl bg-white border font-bold text-lg cursor-pointer hover:shadow-lg transition-all duration-200"
-                     data-action="click->question-navigator#submitForm">
-                <%= radio_button_tag :selected_answer, option, false,
-                    class: "hidden" %>
-                <div class="flex items-center justify-between">
-                  <span><%= option %></span>
-                  <div class="w-6 h-6 border-2 border-gray-300 rounded-full flex items-center justify-center">
-                    <div class="w-3 h-3 bg-blue-500 rounded-full hidden"></div>
-                  </div>
-                </div>
-              </label>
+    <%= form_with url: answer_question_domain_lesson_path(domain, lesson, question_id: question.id), method: :post do |f| %>
+      <div class="space-y-3">
+        <% question.options.each do |option| %>
+          <%
+            selected_option = user_answer&.selected_answer == option
+            is_correct_option = question.correct_answer == option
+            
+            option_class = "flex items-center p-4 rounded-lg border transition-all duration-200 cursor-pointer "
+            if is_answered
+              if is_correct_option
+                option_class += "bg-green-100 border-green-300 text-green-800 font-bold"
+              elsif selected_option
+                option_class += "bg-red-100 border-red-300 text-red-800"
+              else
+                option_class += "bg-gray-50 border-gray-200 text-gray-600"
+              end
+            else
+              option_class += "bg-gray-50 hover:bg-gray-100 border-gray-200"
+            end
+          %>
+          <label class="<%= option_class %> w-full">
+            <%= f.radio_button :selected_answer, option, class: "hidden", disabled: is_answered, onchange: "this.form.requestSubmit()" %>
+            <span class="flex-grow"><%= option %></span>
+            <% if is_answered %>
+              <% if is_correct_option %>
+                <span class="text-green-600">✔ Correct</span>
+              <% elsif selected_option %>
+                <span class="text-red-600">✖ Incorrect</span>
+              <% end %>
             <% end %>
-          <% end %>
+          </label>
         <% end %>
       </div>
-    </div>
+    <% end %>
+
+    <% if is_answered %>
+      <div class="mt-6 p-4 rounded-lg <%= is_correct ? 'bg-green-50' : 'bg-red-50' %>">
+        <h4 class="font-bold <%= is_correct ? 'text-green-800' : 'text-red-800' %>">Explanation</h4>
+        <p class="text-sm <%= is_correct ? 'text-green-700' : 'text-red-700' %> mt-2">
+          <%= question.explanation %>
+        </p>
+      </div>
+    <% end %>
   </div>
 <% end %>
