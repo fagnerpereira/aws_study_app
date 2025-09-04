@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AWS Study Games - Master SAA-C03 Through Play!</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800;900&display=swap');
+    
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .game-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateY(0);
+    }
+
+    .game-card:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+    }
+
+    .floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+      0% { transform: translate(0, 0px); }
+      50% { transform: translate(0, -10px); }
+      100% { transform: translate(0, -0px); }
+    }
+
+    .slide-in {
+      animation: slideIn 0.6s ease-out;
+    }
+
+    @keyframes slideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .8; }
+    }
+
+    .neon-glow {
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+  <!-- Top Navigation -->
+  <nav class="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Back Button & Title -->
+        <div class="flex items-center space-x-4">
+          <%= link_to root_path, class: "text-gray-600 hover:text-gray-800 transition-colors" do %>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          <% end %>
+          <div>
+            <h1 class="text-lg font-black text-gray-900">🎮 AWS Study Games</h1>
+            <p class="text-xs text-gray-600 font-semibold">Learn through interactive challenges</p>
+          </div>
+        </div>
+
+        <!-- User Stats -->
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full shadow-lg">
+            <span class="text-lg mr-1">⚡</span>
+            <span class="text-sm font-black"><%= current_user.experience_points %> XP</span>
+          </div>
+          <div class="flex items-center bg-gradient-to-r from-orange-400 to-red-500 text-white px-3 py-1 rounded-full shadow-lg">
+            <span class="text-lg mr-1">🔥</span>
+            <span class="text-sm font-black"><%= current_user.current_streak %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="text-center mb-16">
+        <h2 class="text-5xl sm:text-6xl font-black text-white mb-6 drop-shadow-lg">
+          🎯 Game-Based Learning
+        </h2>
+        <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto font-semibold">
+          Master AWS SAA-C03 concepts through fun, interactive games! Test your knowledge, earn XP, and become an AWS expert.
+        </p>
+        
+        <!-- Stats Overview -->
+        <div class="flex justify-center space-x-8 mb-8">
+          <div class="bg-white/20 backdrop-blur rounded-2xl p-4 text-center min-w-24">
+            <div class="text-3xl font-black text-white"><%= @total_games %></div>
+            <div class="text-white/80 font-bold text-sm">Games Available</div>
+          </div>
+          <div class="bg-white/20 backdrop-blur rounded-2xl p-4 text-center min-w-24">
+            <div class="text-3xl font-black text-white"><%= @games_played.values.flatten.count %></div>
+            <div class="text-white/80 font-bold text-sm">Games Played</div>
+          </div>
+          <div class="bg-white/20 backdrop-blur rounded-2xl p-4 text-center min-w-24">
+            <div class="text-3xl font-black text-white"><%= @total_xp_earned %></div>
+            <div class="text-white/80 font-bold text-sm">XP From Games</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Games Grid -->
+      <div class="grid gap-8 lg:grid-cols-2 xl:grid-cols-3 max-w-7xl mx-auto">
+        <!-- Service Match Game -->
+        <div class="game-card bg-white rounded-3xl shadow-2xl overflow-hidden slide-in">
+          <div class="bg-gradient-to-r from-blue-500 to-cyan-400 p-8 relative">
+            <div class="text-center">
+              <div class="text-6xl mb-4">🔗</div>
+              <h3 class="text-2xl font-black text-white mb-2">Service Match</h3>
+              <p class="text-white/80 font-semibold">Match AWS services to their categories</p>
+              <div class="mt-4 bg-white/20 rounded-full px-4 py-2 inline-block">
+                <span class="text-white font-black">+20 XP Base</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="mb-6">
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">🎯 Difficulty</span>
+                <span class="font-bold">Beginner</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">⏱️ Duration</span>
+                <span class="font-bold">2-3 minutes</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600">
+                <span class="font-semibold">📚 Focus</span>
+                <span class="font-bold">Service Recognition</span>
+              </div>
+            </div>
+            
+            <%= link_to "/games/service-match", 
+                class: "w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-black py-4 px-6 rounded-2xl hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-center block text-lg" do %>
+              🚀 Start Matching
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Architecture Challenge -->
+        <div class="game-card bg-white rounded-3xl shadow-2xl overflow-hidden slide-in" style="animation-delay: 0.1s;">
+          <div class="bg-gradient-to-r from-green-500 to-emerald-400 p-8 relative">
+            <div class="text-center">
+              <div class="text-6xl mb-4">🏗️</div>
+              <h3 class="text-2xl font-black text-white mb-2">Architecture Challenge</h3>
+              <p class="text-white/80 font-semibold">Build resilient AWS architectures</p>
+              <div class="mt-4 bg-white/20 rounded-full px-4 py-2 inline-block">
+                <span class="text-white font-black">+30 XP Base</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="mb-6">
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">🎯 Difficulty</span>
+                <span class="font-bold">Intermediate</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">⏱️ Duration</span>
+                <span class="font-bold">5-8 minutes</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600">
+                <span class="font-semibold">📚 Focus</span>
+                <span class="font-bold">Solution Design</span>
+              </div>
+            </div>
+            
+            <%= link_to "/games/architecture-challenge", 
+                class: "w-full bg-gradient-to-r from-green-500 to-emerald-400 text-white font-black py-4 px-6 rounded-2xl hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-center block text-lg" do %>
+              🏗️ Build Architecture
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Quick Quiz -->
+        <div class="game-card bg-white rounded-3xl shadow-2xl overflow-hidden slide-in" style="animation-delay: 0.2s;">
+          <div class="bg-gradient-to-r from-purple-500 to-pink-400 p-8 relative">
+            <div class="text-center">
+              <div class="text-6xl mb-4">⚡</div>
+              <h3 class="text-2xl font-black text-white mb-2">Quick Quiz</h3>
+              <p class="text-white/80 font-semibold">Rapid-fire AWS knowledge test</p>
+              <div class="mt-4 bg-white/20 rounded-full px-4 py-2 inline-block">
+                <span class="text-white font-black">+15 XP Base</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="mb-6">
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">🎯 Difficulty</span>
+                <span class="font-bold">Mixed</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">⏱️ Duration</span>
+                <span class="font-bold">1-2 minutes</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600">
+                <span class="font-semibold">📚 Focus</span>
+                <span class="font-bold">Quick Recall</span>
+              </div>
+            </div>
+            
+            <%= link_to "/games/quick-quiz", 
+                class: "w-full bg-gradient-to-r from-purple-500 to-pink-400 text-white font-black py-4 px-6 rounded-2xl hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-center block text-lg" do %>
+              ⚡ Quick Quiz
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Cost Calculator -->
+        <div class="game-card bg-white rounded-3xl shadow-2xl overflow-hidden slide-in" style="animation-delay: 0.3s;">
+          <div class="bg-gradient-to-r from-orange-500 to-red-400 p-8 relative">
+            <div class="text-center">
+              <div class="text-6xl mb-4">💰</div>
+              <h3 class="text-2xl font-black text-white mb-2">Cost Calculator</h3>
+              <p class="text-white/80 font-semibold">Master AWS pricing scenarios</p>
+              <div class="mt-4 bg-white/20 rounded-full px-4 py-2 inline-block">
+                <span class="text-white font-black">+25 XP Base</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="mb-6">
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">🎯 Difficulty</span>
+                <span class="font-bold">Advanced</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">⏱️ Duration</span>
+                <span class="font-bold">3-5 minutes</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600">
+                <span class="font-semibold">📚 Focus</span>
+                <span class="font-bold">Cost Optimization</span>
+              </div>
+            </div>
+            
+            <%= link_to "/games/cost-calculator", 
+                class: "w-full bg-gradient-to-r from-orange-500 to-red-400 text-white font-black py-4 px-6 rounded-2xl hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-center block text-lg" do %>
+              💰 Calculate Costs
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Scenario Tree -->
+        <div class="game-card bg-white rounded-3xl shadow-2xl overflow-hidden slide-in" style="animation-delay: 0.4s;">
+          <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-8 relative">
+            <div class="text-center">
+              <div class="text-6xl mb-4">🌳</div>
+              <h3 class="text-2xl font-black text-white mb-2">Scenario Tree</h3>
+              <p class="text-white/80 font-semibold">Navigate complex AWS decisions</p>
+              <div class="mt-4 bg-white/20 rounded-full px-4 py-2 inline-block">
+                <span class="text-white font-black pulse">+35 XP Base</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="mb-6">
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">🎯 Difficulty</span>
+                <span class="font-bold">Expert</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span class="font-semibold">⏱️ Duration</span>
+                <span class="font-bold">8-12 minutes</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-gray-600">
+                <span class="font-semibold">📚 Focus</span>
+                <span class="font-bold">Problem Solving</span>
+              </div>
+            </div>
+            
+            <%= link_to "/games/scenario-tree", 
+                class: "w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black py-4 px-6 rounded-2xl hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-center block text-lg neon-glow" do %>
+              🌳 Start Scenarios
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Coming Soon Card -->
+        <div class="game-card bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl shadow-2xl overflow-hidden slide-in" style="animation-delay: 0.5s;">
+          <div class="p-8 text-center">
+            <div class="text-6xl mb-4 opacity-50">🚧</div>
+            <h3 class="text-2xl font-black text-gray-700 mb-2">More Games</h3>
+            <p class="text-gray-600 font-semibold mb-6">Coming Soon!</p>
+            <div class="space-y-2">
+              <div class="text-sm text-gray-500">• Security Challenge</div>
+              <div class="text-sm text-gray-500">• Network Designer</div>
+              <div class="text-sm text-gray-500">• Migration Planner</div>
+              <div class="text-sm text-gray-500">• Disaster Recovery</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Section -->
+      <% if @games_played.any? %>
+        <div class="mt-16 bg-white/10 backdrop-blur rounded-3xl p-8">
+          <h3 class="text-2xl font-black text-white text-center mb-8">🎯 Your Game Progress</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% @games_played.each do |game_type, sessions| %>
+              <% avg_score = sessions.map { |s| s[:score] }.sum.to_f / sessions.count %>
+              <% best_score = sessions.map { |s| s[:score] }.max %>
+              
+              <div class="bg-white/20 rounded-2xl p-6 text-center">
+                <h4 class="text-white font-black text-lg mb-2"><%= game_type.to_s.humanize %></h4>
+                <div class="space-y-2">
+                  <div class="text-white/80 text-sm font-semibold">
+                    Played: <%= sessions.count %> times
+                  </div>
+                  <div class="text-white/80 text-sm font-semibold">
+                    Best Score: <%= best_score %>%
+                  </div>
+                  <div class="text-white/80 text-sm font-semibold">
+                    Avg Score: <%= avg_score.round %>%
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Tips Section -->
+      <div class="mt-16 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur rounded-3xl p-8">
+        <h3 class="text-2xl font-black text-white text-center mb-8">💡 Game Tips</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-white">
+          <div class="bg-white/10 rounded-2xl p-6">
+            <div class="text-2xl mb-3">🎯</div>
+            <h4 class="font-black mb-2">Score High for Bonus XP!</h4>
+            <p class="text-white/80 font-semibold text-sm">Get 80%+ for +5 XP bonus, 90%+ for +10 XP bonus!</p>
+          </div>
+          <div class="bg-white/10 rounded-2xl p-6">
+            <div class="text-2xl mb-3">🔄</div>
+            <h4 class="font-black mb-2">Practice Makes Perfect</h4>
+            <p class="text-white/80 font-semibold text-sm">Games reset each time - practice until you master each concept!</p>
+          </div>
+          <div class="bg-white/10 rounded-2xl p-6">
+            <div class="text-2xl mb-3">📚</div>
+            <h4 class="font-black mb-2">Learn from Mistakes</h4>
+            <p class="text-white/80 font-semibold text-sm">Read explanations carefully - they contain exam-relevant details!</p>
+          </div>
+          <div class="bg-white/10 rounded-2xl p-6">
+            <div class="text-2xl mb-3">🏆</div>
+            <h4 class="font-black mb-2">Challenge Yourself</h4>
+            <p class="text-white/80 font-semibold text-sm">Try harder games as you improve - Scenario Tree gives the most XP!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Elements -->
+    <div class="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl floating"></div>
+    <div class="absolute top-40 right-20 w-24 h-24 bg-purple-300/20 rounded-full blur-2xl floating" style="animation-delay: 1s;"></div>
+    <div class="absolute bottom-40 left-1/4 w-40 h-40 bg-blue-300/20 rounded-full blur-xl floating" style="animation-delay: 2s;"></div>
+  </div>
+</body>
+</html>

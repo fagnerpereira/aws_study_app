@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gradient-to-br from-blue-400 via-purple-500 to-green-400 min-h-screen">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AWS Study Quest - Master Your SAA-C03</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800;900&display=swap');
+    
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .domain-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateY(0);
+    }
+
+    .domain-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+      transition: stroke-dashoffset 0.35s;
+      transform-origin: 50% 50%;
+    }
+
+    .floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+      0% { transform: translate(0, 0px); }
+      50% { transform: translate(0, -10px); }
+      100% { transform: translate(0, -0px); }
+    }
+
+    .pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .7; }
+    }
+
+    .gradient-text {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .neon-glow {
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+  <!-- Top Navigation Bar -->
+  <nav class="bg-white/95 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-20">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg floating">
+            <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-black gradient-text">AWS Study Quest</h1>
+            <p class="text-xs text-gray-600 font-semibold">Master SAA-C03 Certification</p>
+          </div>
+        </div>
+        
+        <!-- User Stats & Actions -->
+        <div class="flex items-center space-x-6">
+          <% if logged_in? %>
+            <!-- Streak Counter -->
+            <div class="flex items-center bg-gradient-to-r from-orange-400 to-red-500 text-white px-4 py-2 rounded-full shadow-lg">
+              <span class="text-2xl mr-2 pulse">🔥</span>
+              <div class="text-center">
+                <div class="text-xl font-black"><%= current_user.current_streak %></div>
+                <div class="text-xs font-bold opacity-90">Day Streak</div>
+              </div>
+            </div>
+
+            <!-- XP and Level -->
+            <div class="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg">
+              <span class="text-2xl mr-2">⚡</span>
+              <div class="text-center">
+                <div class="text-xl font-black"><%= current_user.experience_points %></div>
+                <div class="text-xs font-bold opacity-90">XP • Level <%= current_user.level %></div>
+              </div>
+            </div>
+
+            <!-- User Menu -->
+            <div class="flex items-center space-x-3">
+              <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center font-black text-white text-lg shadow-lg">
+                <%= current_user.name.first.upcase %>
+              </div>
+              <div class="hidden sm:block">
+                <div class="font-bold text-gray-800"><%= current_user.name %></div>
+                <%= link_to "Profile", profile_path, class: "text-sm text-blue-600 hover:text-blue-800 font-semibold" %>
+                <span class="mx-1">•</span>
+                <%= link_to "Logout", logout_path, method: :delete, class: "text-sm text-gray-500 hover:text-red-600" %>
+              </div>
+            </div>
+          <% else %>
+            <!-- Guest Actions -->
+            <div class="flex space-x-3">
+              <%= link_to login_path, class: "bg-white/20 backdrop-blur text-blue-800 px-6 py-3 rounded-full hover:bg-white/30 transition-all duration-200 font-bold shadow-lg" do %>
+                Sign In
+              <% end %>
+              <%= link_to signup_path, class: "bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full hover:shadow-xl transition-all duration-200 font-bold neon-glow" do %>
+                Start Learning
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="text-center mb-16">
+        <h2 class="text-5xl sm:text-6xl font-black text-white mb-6 drop-shadow-lg">
+          Master AWS SAA-C03
+        </h2>
+        <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto font-semibold">
+          🚀 Learn AWS architecture like a game! Earn XP, build streaks, and ace your certification with our interactive lessons.
+        </p>
+        
+        <% unless logged_in? %>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <%= link_to signup_path, class: "bg-gradient-to-r from-green-400 to-blue-500 text-white px-8 py-4 rounded-full text-xl font-black hover:shadow-2xl transition-all duration-300 transform hover:scale-105 neon-glow" do %>
+              🎯 Start Your Journey FREE
+            <% end %>
+            <%= link_to login_path, class: "bg-white/20 backdrop-blur text-white px-8 py-4 rounded-full text-xl font-bold hover:bg-white/30 transition-all duration-200" do %>
+              🔓 Try Demo Account
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Domain Learning Path -->
+      <div class="mb-8">
+        <h3 class="text-3xl font-black text-white text-center mb-8">
+          🎯 Your Learning Path
+        </h3>
+      </div>
+
+      <!-- Domain Cards Grid -->
+      <div class="grid gap-8 lg:grid-cols-2 max-w-6xl mx-auto">
+        <% domain_colors = [
+          { bg: 'from-blue-500 to-cyan-400', icon: '🏗️', accent: 'bg-blue-500' },
+          { bg: 'from-green-500 to-emerald-400', icon: '⚡', accent: 'bg-green-500' },
+          { bg: 'from-purple-500 to-pink-400', icon: '🔒', accent: 'bg-purple-500' },
+          { bg: 'from-orange-500 to-red-400', icon: '💰', accent: 'bg-orange-500' }
+        ] %>
+        
+        <% @domains.each_with_index do |domain, index| %>
+          <% color = domain_colors[index] %>
+          <% if logged_in? %>
+            <% progress = @user_progress.find { |p| p[:domain] == domain } %>
+            <% completion = progress[:completion_percentage] %>
+            <% completed_lessons = progress[:completed_lessons] %>
+            <% total_lessons = progress[:total_lessons] %>
+          <% else %>
+            <% completion = 0 %>
+            <% completed_lessons = 0 %>
+            <% total_lessons = domain.lessons.count %>
+          <% end %>
+
+          <div class="domain-card bg-white rounded-3xl shadow-2xl overflow-hidden">
+            <!-- Card Header with Progress Ring -->
+            <div class="bg-gradient-to-r <%= color[:bg] %> p-8 relative">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center mb-4">
+                    <span class="text-4xl mr-3"><%= color[:icon] %></span>
+                    <div>
+                      <h3 class="text-xl font-black text-white"><%= domain.name %></h3>
+                      <div class="flex items-center text-white/80 text-sm font-bold">
+                        <span class="bg-white/20 px-3 py-1 rounded-full mr-2">
+                          <%= (domain.weight * 100).to_i %>% of Exam
+                        </span>
+                        <span><%= total_lessons %> Lessons</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Circular Progress -->
+                <div class="relative w-20 h-20">
+                  <svg class="progress-ring w-20 h-20" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="54" fill="none" stroke="white" stroke-opacity="0.2" stroke-width="8"/>
+                    <circle cx="60" cy="60" r="54" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"
+                            stroke-dasharray="<%= 2 * Math::PI * 54 %>"
+                            stroke-dashoffset="<%= 2 * Math::PI * 54 * (1 - completion/100) %>"
+                            class="progress-ring-circle"/>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="text-white font-black text-lg"><%= completion.round %>%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-8">
+              <p class="text-gray-600 mb-6 text-sm leading-relaxed">
+                <%= domain.description %>
+              </p>
+
+              <!-- Progress Bar -->
+              <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-500 mb-2">
+                  <span class="font-semibold">Your Progress</span>
+                  <span class="font-bold"><%= completed_lessons %>/<%= total_lessons %> completed</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                  <div class="<%= color[:accent] %> h-3 rounded-full transition-all duration-500 ease-out" 
+                       style="width: <%= completion %>%"></div>
+                </div>
+              </div>
+
+              <!-- Action Button -->
+              <div class="flex items-center justify-between">
+                <%= link_to domain_path(domain), 
+                    class: "flex-1 bg-gradient-to-r #{color[:bg]} text-white font-black py-4 px-6 rounded-2xl hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-center text-lg" do %>
+                  <% if logged_in? && completion > 0 %>
+                    🚀 Continue Learning
+                  <% else %>
+                    ▶️ Start Learning
+                  <% end %>
+                <% end %>
+                
+                <% if logged_in? && completion == 100 %>
+                  <div class="ml-4 flex items-center text-green-500">
+                    <span class="text-3xl">🏆</span>
+                    <span class="ml-2 font-black text-sm">MASTERED!</span>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Overall Progress Section -->
+      <% if logged_in? %>
+        <div class="mt-16 bg-white/10 backdrop-blur rounded-3xl p-8 text-center">
+          <h3 class="text-2xl font-black text-white mb-6">🎯 Your Overall Progress</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="bg-white/20 rounded-2xl p-4">
+              <div class="text-3xl font-black text-white"><%= @user_progress.sum { |p| p[:completed_lessons] } %></div>
+              <div class="text-white/80 font-bold text-sm">Lessons Completed</div>
+            </div>
+            <div class="bg-white/20 rounded-2xl p-4">
+              <div class="text-3xl font-black text-white"><%= current_user.experience_points %></div>
+              <div class="text-white/80 font-bold text-sm">Total XP</div>
+            </div>
+            <div class="bg-white/20 rounded-2xl p-4">
+              <div class="text-3xl font-black text-white"><%= current_user.level %></div>
+              <div class="text-white/80 font-bold text-sm">Current Level</div>
+            </div>
+            <div class="bg-white/20 rounded-2xl p-4">
+              <div class="text-3xl font-black text-white"><%= current_user.current_streak %></div>
+              <div class="text-white/80 font-bold text-sm">Day Streak</div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Floating Elements for Visual Interest -->
+    <div class="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl floating"></div>
+    <div class="absolute top-40 right-20 w-32 h-32 bg-purple-300/20 rounded-full blur-2xl floating" style="animation-delay: 1s;"></div>
+    <div class="absolute bottom-40 left-1/4 w-24 h-24 bg-blue-300/20 rounded-full blur-xl floating" style="animation-delay: 2s;"></div>
+  </div>
+</body>
+</html>
