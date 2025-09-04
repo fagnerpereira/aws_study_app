@@ -2,7 +2,7 @@ class GamesController < ApplicationController
   before_action :require_user
 
   def index
-    @total_games = 5
+    @total_games = game_methods.count
     @games_played = session[:games_played] || {}
     @total_xp_earned = session[:games_xp] || 0
   end
@@ -230,6 +230,10 @@ class GamesController < ApplicationController
 
   def check_scenario
     next_scenario_id_str = params[:next_scenario_id]
+    chosen_points = params[:points].to_i # Get points from the selected option
+
+    session[:scenario_score] ||= 0 # Initialize score if not present
+    session[:scenario_score] += chosen_points # Add points for the chosen option
 
     if next_scenario_id_str == "end"
       # End of scenario
@@ -248,9 +252,6 @@ class GamesController < ApplicationController
     else
       next_scenario_id = next_scenario_id_str.to_i
       next_scenario = get_all_scenarios.find { |s| s[:id] == next_scenario_id }
-
-      # In a real app, you'd fetch the option chosen and add points.
-      # For this simplified version, we'll just move to the next step.
 
       if next_scenario
         render json: {
@@ -402,5 +403,9 @@ class GamesController < ApplicationController
     else
       "🔄 Don't give up! Practice makes perfect!"
     end
+  end
+
+  def game_methods
+    [ :service_match, :architecture_challenge, :cost_calculator, :quick_quiz, :scenario_tree ]
   end
 end

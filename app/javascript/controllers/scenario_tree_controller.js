@@ -5,6 +5,7 @@ export default class extends Controller {
 
   selectOption(event) {
     const nextScenarioId = event.currentTarget.dataset.nextScenarioId
+    const points = event.currentTarget.dataset.points
     
     fetch('/games/scenario-tree/check', {
       method: 'POST',
@@ -13,7 +14,8 @@ export default class extends Controller {
         'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
       },
       body: JSON.stringify({
-        next_scenario_id: nextScenarioId
+        next_scenario_id: nextScenarioId,
+        points: points
       })
     })
     .then(response => response.json())

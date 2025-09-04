@@ -3,7 +3,7 @@
 <p class="text-white/90 mb-6"><%= scenario[:description] %></p>
 <div class="space-y-3">
   <% scenario[:options].each do |option| %>
-    <button class="w-full bg-white/20 text-white p-4 rounded-lg text-left hover:bg-white/30 transition-all duration-200" data-action="click->scenario-tree#selectOption" data-next-scenario-id="<%= option[:next_scenario] %>">
+    <button class="w-full bg-white/20 text-white p-4 rounded-lg text-left hover:bg-white/30 transition-all duration-200" data-action="click->scenario-tree#selectOption" data-next-scenario-id="<%= option[:next_scenario] %>" data-points="<%= option[:points] %>">
       <%= option[:text] %>
     </button>
   <% end %>
