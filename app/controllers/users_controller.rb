@@ -1,20 +1,20 @@
 class UsersController < ApplicationController
-  before_action :require_guest, only: [:new, :create]
-  before_action :require_user, only: [:show]
-  
+  before_action :require_guest, only: [ :new, :create ]
+  before_action :require_user, only: [ :show ]
+
   def new
     @user = User.new
   end
 
   def create
     @user = User.new(user_params)
-    
+
     if @user.save
       session[:user_id] = @user.id
       flash[:notice] = "Welcome to AWS Study App, #{@user.name}!"
       redirect_to root_path
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -24,7 +24,7 @@ class UsersController < ApplicationController
     @total_xp = @user.experience_points
     @current_level = @user.level
     @current_streak = @user.current_streak
-    
+
     # Calculate progress per domain
     @domain_progress = Domain.ordered.map do |domain|
       {
@@ -35,9 +35,9 @@ class UsersController < ApplicationController
       }
     end
   end
-  
+
   private
-  
+
   def user_params
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
   end

@@ -9,7 +9,7 @@ class CreateUserProgresses < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :user_progresses, [:user_id, :lesson_id], unique: true
+
+    add_index :user_progresses, [ :user_id, :lesson_id ], unique: true
   end
 end

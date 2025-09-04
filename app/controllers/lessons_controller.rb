@@ -1,17 +1,17 @@
 class LessonsController < ApplicationController
   before_action :require_user
   before_action :set_lesson
-  
+
   def show
     @domain = @lesson.domain
     @questions = @lesson.questions.includes(:user_answers)
     @user_progress = current_user.user_progresses.find_by(lesson: @lesson)
-    
+
     # Get user's answers for this lesson
     @user_answers = current_user.user_answers
                                 .where(question: @questions)
                                 .index_by(&:question_id)
-    
+
     # Calculate lesson completion
     @total_questions = @questions.count
     @answered_questions = @user_answers.count
@@ -28,34 +28,34 @@ class LessonsController < ApplicationController
     @domain = @lesson.domain
     @questions = @lesson.questions.order(:id) # Order consistently for test
   end
-  
+
   def complete
     @user_progress = current_user.user_progresses.find_or_initialize_by(lesson: @lesson)
-    
+
     unless @user_progress.completed?
       # Calculate final score
       questions = @lesson.questions
       correct_answers = current_user.user_answers
                                    .where(question: questions, correct: true)
                                    .count
-      
+
       score = questions.count > 0 ? (correct_answers.to_f / questions.count * 100).round(2) : 0
-      
+
       # Mark lesson as completed
       @user_progress.mark_completed!(score)
-      
+
       # Award experience points
       xp_earned = @lesson.total_experience_points
       current_user.add_experience!(xp_earned)
-      
+
       flash[:notice] = "Lesson completed! You earned #{xp_earned} XP. Score: #{score}%"
     else
       flash[:alert] = "You have already completed this lesson"
     end
-    
+
     redirect_to domain_lesson_path(@lesson.domain, @lesson)
   end
-  
+
   def answer_question
     question = @lesson.questions.find(params[:question_id])
 
@@ -115,9 +115,9 @@ class LessonsController < ApplicationController
       end
     end
   end
-  
+
   private
-  
+
   def set_lesson
     @lesson = Lesson.find(params[:id])
   end

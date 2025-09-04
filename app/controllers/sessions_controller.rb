@@ -1,20 +1,20 @@
 class SessionsController < ApplicationController
-  before_action :require_guest, only: [:new, :create]
-  
+  before_action :require_guest, only: [ :new, :create ]
+
   def new
     # Login form
   end
 
   def create
     user = User.find_by(email: params[:email])
-    
+
     if user && user.authenticate(params[:password])
       session[:user_id] = user.id
       flash[:notice] = "Welcome back, #{user.name}!"
       redirect_to root_path
     else
       flash.now[:alert] = "Invalid email or password"
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 

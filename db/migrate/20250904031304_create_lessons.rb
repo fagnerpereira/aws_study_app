@@ -8,7 +8,7 @@ class CreateLessons < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :lessons, [:domain_id, :position], unique: true
+
+    add_index :lessons, [ :domain_id, :position ], unique: true
   end
 end

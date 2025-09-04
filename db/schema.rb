@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_04_031320) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_04_053958) do
   create_table "domains", force: :cascade do |t|
     t.string "name", null: false
     t.text "description", null: false
@@ -29,6 +29,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_04_031320) do
     t.integer "position", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "summary"
     t.index ["domain_id", "position"], name: "index_lessons_on_domain_id_and_position", unique: true
     t.index ["domain_id"], name: "index_lessons_on_domain_id"
   end
